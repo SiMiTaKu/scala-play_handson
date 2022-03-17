@@ -8,3 +8,11 @@ GET     /                           controllers.HomeController.index()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+GET     /tweet/list                 controllers.tweet.TweetController.list
+
+GET     /tweet/$id<[0-9]+>          controllers.tweet.TweetController.show(id:Long)
+
+GET     /tweet/store                controllers.tweet.TweetController.register
+
+#POST    /tweet/store                controllers.tweet.TweetController.store
