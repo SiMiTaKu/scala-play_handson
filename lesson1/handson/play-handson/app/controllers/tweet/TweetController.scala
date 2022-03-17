@@ -35,7 +35,7 @@ class TweetController @Inject()(val controllerComponents: ControllerComponents) 
   def register() = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.tweet.store(form))
   }
-  
+
   def store() = Action { implicit request: Request[AnyContent] =>
     NoContent
   }
