@@ -10,4 +10,4 @@ RUN apt-get update && \
 ENV LC_ALL ja_JP.UTF-8
 
 # docker/db/my.cnfをdockerイメージ上の/etc/...にコピーして配置
-COPY ./my.cnf /etc/mysql/conf.d/my.cnf
+COPY my.cnf /etc/mysql/conf.d/my.cnf
