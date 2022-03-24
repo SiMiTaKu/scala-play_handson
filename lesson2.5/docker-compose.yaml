@@ -1,0 +1,11 @@
+version: '3'
+services:
+  play_angular:
+    build: ./docker/angular
+    ports:
+      - "5555:5555"
+    container_name: play_angular
+    volumes:
+      - ./:/source
+    working_dir: /source/ui
+    tty: true
