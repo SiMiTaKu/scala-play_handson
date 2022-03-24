@@ -8,3 +8,8 @@ target
 /.settings
 /RUNNING_PID
 .DS_Store
+.ivy2
+.cache/coursier
+.sbt
+logs
+output

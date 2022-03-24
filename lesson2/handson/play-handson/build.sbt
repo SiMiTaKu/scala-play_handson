@@ -26,4 +26,4 @@ libraryDependencies ++= Seq(
 
 // add code generation task
 lazy val slickCodeGen = taskKey[Unit]("execute Slick CodeGen")
-slickCodeGen         := (runMain in Compile).toTask(" tasks.SlickCodeGen").value
+slickCodeGen         := (runMain in Compile).toTask(" tasks.CustomSlickCodeGen").value

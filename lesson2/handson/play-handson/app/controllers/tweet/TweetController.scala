@@ -5,7 +5,7 @@ import play.api.mvc.ControllerComponents
 import play.api.mvc.BaseController
 import play.api.mvc.Request
 import play.api.mvc.AnyContent
-import models.Tweet
+import slick.models.Tweet
 import play.api.data.Form
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.i18n.I18nSupport
