@@ -23,6 +23,49 @@ class TweetRepository @Inject()(
    */
   def all(): Future[Seq[Tweet]] = db.run(query.result)
 
+  /**
+   * idを指定してTweetを取得
+   */
+  def findById (id: Long): Future[Option[Tweet]] = db.run (
+    query.filter(x => x.id === id).result.headOption
+  )
+
+  /**
+   * 対象のtweetを更新する
+   */
+  def update(tweet: Tweet): Future[Int] = db.run(
+    query.filter(_.id === tweet.id).update(tweet)
+  )
+
+  /**
+   * 対象のTweetの内容を更新する
+   */
+  def updateContent(id: Long, content: String): Future[Int] = {
+    db.run(
+      query.filter(_.id === id).map(_.content).update(content)
+    )
+  }
+
+  /**
+   * tweetを1件登録する
+   */
+  def insert(tweet: Tweet): Future[Long]= db.run(
+    // returningメソッドを利用することで、このメソッドに指定したデータを登録結果として返却するようにできる
+    (query returning query.map(_.id)) += tweet
+  )
+
+  /**
+   * 対象のデータを削除する
+   */
+  def delete(id: Long): Future[Int] = delete(Some(id))
+
+  /**
+   * 対象のデータを削除する
+   */
+  def delete(idOpt: Option[Long]) = db.run(
+    query.filter(_.id === idOpt).delete
+  )
+
   // ########## [Table Mapping] ##########
   private class TweetTable(_tableTag: Tag) extends Table[Tweet](_tableTag, Some("twitter_clone"), "tweet") {
 

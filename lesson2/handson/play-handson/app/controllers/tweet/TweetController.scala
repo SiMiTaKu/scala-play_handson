@@ -9,21 +9,36 @@ import slick.models.Tweet
 import play.api.data.Form
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.i18n.I18nSupport
+import slick.repositories.TweetRepository
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
 case class TweetFormData(content: String)
 
 @Singleton
-class TweetController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport{
+class TweetController @Inject()(
+    val controllerComponents: ControllerComponents,
+    tweetRepository:          TweetRepository
+    )(implicit ec: ExecutionContext) extends BaseController with I18nSupport{
+
   val tweets = scala.collection.mutable.ArrayBuffer((1L to 10L).map(i => Tweet(Some(i), s"test tweet${i.toString}")): _*)
 
-  def list() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.tweet.list(tweets.toSeq))
+  def list() = Action async{ implicit request: Request[AnyContent] =>
+    for {
+      results <- tweetRepository.all()
+    } yield{
+      Ok(views.html.tweet.list(results))
+    }
   }
 
-  def show(id: Long) = Action { implicit request: Request[AnyContent] =>
-    tweets.find(_.id.exists(_ == id)) match {
-      case Some(tweet) => Ok(views.html.tweet.show(tweet))
-      case None        => NotFound(views.html.error.page404())
+  def show(id: Long) = Action async { implicit request: Request[AnyContent] =>
+    for {
+      tweetOpt <- tweetRepository.findById(id)
+    } yield {
+      tweetOpt match {
+        case Some(tweet) => Ok(views.html.tweet.show(tweet))
+        case None        => NotFound(views.html.error.page404())
+      }
     }
   }
 
@@ -37,55 +52,64 @@ class TweetController @Inject()(val controllerComponents: ControllerComponents) 
     Ok(views.html.tweet.store(form))
   }
 
-  def store() = Action { implicit request: Request[AnyContent] =>
+  def store() = Action async { implicit request: Request[AnyContent] =>
     form.bindFromRequest().fold(
       (formWithErrors: Form[TweetFormData]) =>{
-        BadRequest(views.html.tweet.store(formWithErrors))
+        Future.successful(BadRequest(views.html.tweet.store(formWithErrors)))
       },
       (tweetFormData: TweetFormData) => {
-        tweets += Tweet(Some(tweets.size + 1L), tweetFormData.content)
-        Redirect("/tweet/list")
-      }
-    )
-  }
-
-  def edit(id:Long) = Action { implicit request: Request[AnyContent] =>
-    tweets.find(_.id.exists(_ == id)) match {
-      case Some(tweet) =>
-        Ok(views.html.tweet.edit(
-          id,
-          form.fill(TweetFormData(tweet.content))
-        ))
-      case None =>
-        NotFound(views.html.error.page404())
-    }
-  }
-
-  def update(id:Long) = Action { implicit request: Request[AnyContent] =>
-    form.bindFromRequest().fold(
-      (formWithErrors: Form[TweetFormData]) => {
-        BadRequest(views.html.tweet.edit(id, formWithErrors))
-      },
-      (data: TweetFormData) => {
-        tweets.find(_.id.exists(_ == id)) match {
-          case Some(tweet) =>
-            tweets.update(id.toInt - 1, tweet.copy(content = data.content))
-            Redirect(routes.TweetController.list)
-          case None        =>
-            NotFound(views.html.error.page404())
+        for {
+          _ <- tweetRepository.insert(Tweet(None, tweetFormData.content))
+        } yield {
+          Redirect(routes.TweetController.list)
         }
       }
     )
   }
 
-  def delete() = Action {implicit request: Request[AnyContent] =>
+  def edit(id:Long) = Action async{ implicit request: Request[AnyContent] =>
+    for {
+      tweetOpt <- tweetRepository.findById(id)
+    } yield {
+      tweetOpt match {
+        case Some(tweet) =>
+          Ok(views.html.tweet.edit(
+            id,
+            form.fill(TweetFormData(tweet.content))
+          ))
+        case None =>
+          NotFound(views.html.error.page404())
+      }
+    }
+  }
+
+  def update(id:Long) = Action async{ implicit request: Request[AnyContent] =>
+    form.bindFromRequest().fold(
+      (formWithErrors: Form[TweetFormData]) => {
+        Future.successful(BadRequest(views.html.tweet.edit(id, formWithErrors)))
+      },
+      (data: TweetFormData) => {
+        for {
+          count <- tweetRepository.updateContent(id, data.content)
+        } yield {
+          count match {
+            case 0 => NotFound(views.html.error.page404())
+            case _ => Redirect(routes.TweetController.list)
+          }
+        }
+      }
+    )
+  }
+
+  def delete() = Action async {implicit request: Request[AnyContent] =>
     val idOpt = request.body.asFormUrlEncoded.get("id").headOption
-    tweets.find(_.id.map(_.toString) == idOpt) match {
-      case Some(tweet) =>
-        tweets -= tweet
-        Redirect(routes.TweetController.list)
-      case None        =>
-        NotFound(views.html.error.page404())
+    for {
+      result <- tweetRepository.delete(idOpt.map(_.toLong))
+    } yield {
+      result match {
+        case 0 => NotFound(views.html.error.page404())
+        case _ => Redirect(routes.TweetController.list)
+      }
     }
   }
 }

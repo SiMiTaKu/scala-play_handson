@@ -5,4 +5,8 @@ definers='mysql.sys@localhost' 'mysql.sys@localhost'
 client_cs_names='utf8' 'utf8'
 connection_cl_names='utf8_general_ci' 'utf8_general_ci'
 db_cl_names='utf8_general_ci' 'utf8_general_ci'
+<<<<<<< HEAD
 created=164808601074 164808601074
+=======
+created=164809875410 164809875411
+>>>>>>> e6fc775 (lesson2終了時)

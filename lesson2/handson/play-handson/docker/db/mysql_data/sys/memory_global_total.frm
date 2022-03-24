@@ -7,7 +7,11 @@ definer_user=mysql.sys
 definer_host=localhost
 suid=0
 with_check_option=0
+<<<<<<< HEAD
 timestamp=2022-03-24 01:40:10
+=======
+timestamp=2022-03-24 05:12:34
+>>>>>>> e6fc775 (lesson2終了時)
 create-version=1
 source=SELECT sys.format_bytes(SUM(CURRENT_NUMBER_OF_BYTES_USED)) total_allocated FROM performance_schema.memory_summary_global_by_event_name
 client_cs_name=utf8

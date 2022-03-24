@@ -13,3 +13,5 @@ target
 .sbt
 logs
 output
+mysql_data
+
