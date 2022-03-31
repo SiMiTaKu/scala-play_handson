@@ -1,0 +1,17 @@
+logs
+target
+/.bsp
+.idea
+/.idea_modules
+/.classpath
+/.project
+/.settings
+/RUNNING_PID
+.DS_Store
+.ivy2
+.cache/coursier
+.sbt
+logs
+output
+mysql_data
+

@@ -1,0 +1,43 @@
+@import slick.models.Tweet
+@(tweets: Seq[Tweet])(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+
+
+@css = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/list.css")">
+}
+
+@scripts = {
+    <script src="@routes.Assets.versioned("javascripts/list.js")" type="text/javascript"></script>
+}
+
+@main(
+    title   = "一覧画面",
+    scripts = scripts,
+    css    = css,
+) {
+    <h1>一覧画面です</h1>
+    <ul>
+        @for(tweet <- tweets) {
+            @* 削除用にフォームを追加 *@
+            <div class = "card" data-href = "@controllers.tweet.routes.TweetController.show(tweet.id.getOrElse(0))">
+                <div class="card_content">
+                @tweet.content
+                </div>
+                <div class="card_footer">
+                    <div class="card_footer_item">
+                        <a href="@controllers.tweet.routes.TweetController.edit(tweet.id.getOrElse(0))">
+                            <i class="far fa-edit"></i>
+                        </a>
+                    </div>
+                    <div class="card_footer_item">
+                    @helper.form(action = controllers.tweet.routes.TweetController.delete) {
+                        @helper.CSRF.formField
+                        <input type="hidden" value="@tweet.id" name="id">
+                        <i class="far fa-trash-alt delete"></i>
+                    }
+                    </div>
+                </div>
+            </div>
+        }
+    </ul>
+}
